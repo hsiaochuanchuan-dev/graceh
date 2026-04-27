@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grace - OtherNote - Dividend</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+    }
+    
+    header {
+      background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+      color: white;
+      padding: 20px 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    
+    header h1 {
+      font-size: 24px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    
+    header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .toolbar {
+      background: #fff;
+      padding: 12px 24px;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    
+    .btn:hover {
+      background: #1557b0;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .btn-secondary {
+      background: #5f6368;
+    }
+    
+    .btn-secondary:hover {
+      background: #4a4e52;
+    }
+    
+    .container {
+      padding: 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+      overflow: hidden;
+    }
+    
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #202124;
+    }
+    
+    .table-wrapper {
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    
+    th {
+      background: #f8f9fa;
+      padding: 14px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #5f6368;
+      border-bottom: 2px solid #e0e0e0;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+    }
+    
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e8eaed;
+      color: #202124;
+    }
+    
+    tr:hover {
+      background: #f8f9fa;
+    }
+    
+    tr:nth-child(even) {
+      background: #fafafa;
+    }
+    
+    tr:nth-child(even):hover {
+      background: #f0f0f0;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: #5f6368;
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #e0e0e0;
+      border-top-color: #1a73e8;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .error {
+      text-align: center;
+      padding: 40px 20px;
+      color: #d93025;
+    }
+    
+    .status {
+      font-size: 12px;
+      color: #5f6368;
+    }
+    
+    .status.success {
+      color: #34a853;
+    }
+    
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .summary-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    
+    .summary-card h3 {
+      font-size: 12px;
+      color: #5f6368;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    
+    .summary-card .value {
+      font-size: 28px;
+      font-weight: 600;
+      color: #1a73e8;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📊 Grace - OtherNote</h1>
+    <p>Dividend Worksheet</p>
+  </header>
+  
+  <div class="toolbar">
+    <a href="https://docs.google.com/spreadsheets/d/1JgVO35PwZYDHnzjR22-SgTx6PvrXpAkV/edit#gid=1066747437" 
+       target="_blank" 
+       class="btn">
+      ✏️ Edit in Google Sheets
+    </a>
+    <button onclick="loadData()" class="btn btn-secondary">
+      🔄 Refresh Data
+    </button>
+    <span id="status" class="status">Ready</span>
+  </div>
+  
+  <div class="container">
+    <div class="summary" id="summary"></div>
+    
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">📋 Data Table</span>
+        <span id="rowCount" class="status">Loading...</span>
+      </div>
+      <div class="table-wrapper">
+        <table id="dataTable">
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const API_URL = '/api/data';
+    
+    async function loadData() {
+      const status = document.getElementById('status');
+      const tableHead = document.getElementById('tableHead');
+      const tableBody = document.getElementById('tableBody');
+      const rowCount = document.getElementById('rowCount');
+      
+      status.textContent = 'Loading...';
+      status.className = 'status';
+      tableBody.innerHTML = '<tr><td colspan="100"><div class="loading"><div class="loading-spinner"></div>Loading data...</div></td></tr>';
+      
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error('Failed to fetch data');
+        
+        const result = await response.json();
+        
+        if (result.error) {
+          throw new Error(result.error);
+        }
+        
+        const data = result.data;
+        
+        if (data.length === 0) {
+          throw new Error('No data found');
+        }
+        
+        renderTable(data);
+        renderSummary(data);
+        
+        rowCount.textContent = `${data.length - 1} rows`;
+        status.textContent = '✓ Data loaded successfully';
+        status.className = 'status success';
+        
+      } catch (error) {
+        console.error('Error:', error);
+        status.textContent = 'Error: ' + error.message;
+        status.className = 'status error';
+        tableBody.innerHTML = `<tr><td colspan="100"><div class="error">Failed to load data: ${error.message}<br><br><a href="https://docs.google.com/spreadsheets/d/1JgVO35PwZYDHnzjR22-SgTx6PvrXpAkV/edit#gid=1066747437" target="_blank" class="btn">Open in Google Sheets</a></div></td></tr>`;
+      }
+    }
+    
+    function renderTable(data) {
+      const tableHead = document.getElementById('tableHead');
+      const tableBody = document.getElementById('tableBody');
+      
+      if (data.length < 2) {
+        tableBody.innerHTML = '<tr><td colspan="100">No data available</td></tr>';
+        return;
+      }
+      
+      const headers = data[0];
+      const rows = data.slice(1);
+      
+      tableHead.innerHTML = '<tr>' + headers.map(h => `<th>${escapeHtml(h)}</th>`).join('') + '</tr>';
+      tableBody.innerHTML = rows.map(row => {
+        const cells = row.map((cell, i) => `<td>${escapeHtml(cell)}</td>`).join('');
+        return `<tr>${cells}</tr>`;
+      }).join('');
+    }
+    
+    function renderSummary(data) {
+      const summary = document.getElementById('summary');
+      
+      if (data.length < 2) {
+        summary.innerHTML = '';
+        return;
+      }
+      
+      const headers = data[0];
+      const rows = data.slice(1);
+      
+      const numericCols = [];
+      headers.forEach((header, i) => {
+        const values = rows.map(r => parseFloat(r[i]?.replace(/[,$]/g, ''))).filter(v => !isNaN(v));
+        if (values.length > rows.length * 0.5) {
+          numericCols.push({ index: i, name: header, values });
+        }
+      });
+      
+      if (numericCols.length > 0) {
+        summary.innerHTML = numericCols.slice(0, 4).map(col => `
+          <div class="summary-card">
+            <h3>${escapeHtml(col.name)}</h3>
+            <div class="value">${formatNumber(col.values.reduce((a, b) => a + b, 0))}</div>
+          </div>
+        `).join('');
+      }
+    }
+    
+    function escapeHtml(text) {
+      if (!text) return '';
+      return text.replace(/&/g, '&amp;')
+                 .replace(/</g, '&lt;')
+                 .replace(/>/g, '&gt;')
+                 .replace(/"/g, '&quot;');
+    }
+    
+    function formatNumber(num) {
+      return new Intl.NumberFormat('en-US', { 
+        maximumFractionDigits: 2 
+      }).format(num);
+    }
+    
+    loadData();
+  </script>
+</body>
+</html>
